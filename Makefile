@@ -1,393 +1,341 @@
-# ################################################################
-# Copyright (c) 2018-present, Steven Burg, NeoWare, Inc.
-# All rights reserved.
-#
-# ################################################################
+# Makefile for Zip, ZipNote, ZipCloak and ZipSplit
 
-PRGDIR   = programs
-ZSTDDIR  = lib
-BUILDIR  = build
-ZWRAPDIR = zlibWrapper
-TESTDIR  = tests
-FUZZDIR  = $(TESTDIR)/fuzz
+# what you can make ...
+all:
+	@echo ''
+	@echo 'Make what?  You must say what system to make Zip for--e.g.'
+	@echo '"make generic".'
+	@echo 'Choices: generic, generic_gcc, att6300nodir,'
+	@echo 'coherent, cray_v3, cygwin, lynx, minix, os390,'
+	@echo 'qnx, qnxnto, solaris, solaris_gcc'
+	@echo 'Try first "make -f unix/Makefile generic" as'
+	@echo 'it should autodetect and set the proper flags.'
+	@echo 'To make the manuals use "make zipsman" after Zip is made.'
+	@echo 'See the files INSTALL and zip.txt for more information.'
+	@echo ''
 
-# Define nul output
-VOID = /dev/null
+list:   all
 
-ifneq (,$(filter Windows%,$(OS)))
-EXT =.exe
-else
-EXT =
-endif
+#MAKE = make -f unix/Makefile
+MAKEF = -f Makefile
+SHELL = /bin/sh
+LN = ln -s
 
-## default: Build lib-release and zstd-release
-.PHONY: default
-default: lib-release zstd-release
+# (to use the GNU compiler, change cc to gcc in CC)
+CC = cc
+BIND = $(CC)
+AS = $(CC) -c
+CPP = /lib/cpp
+E =
 
-.PHONY: all
-all: allmost examples manual contrib
+# probably can change this to 'install' if you have it
+INSTALL_PROGRAM = cp
+# probably can change this to 'install -d' if you have it
+# XXX NextStep 3.3 and Openstep 4.x don't know about -p !
 
-.PHONY: allmost
-allmost: allzstd zlibwrapper
+#edit 1/15/19 (move all build files into "Build" directory)
+BUILD_D = mkdir Build
+MOVE_BUILD_FILES = mv flags* zip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o zipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o Build/
 
-# skip zwrapper, can't build that on alternate architectures without the proper zlib installed
-.PHONY: allzstd
-allzstd: lib
-	$(MAKE) -C $(PRGDIR) all
-	$(MAKE) -C $(TESTDIR) all
+INSTALL_D = mkdir -p
+CHMOD = chmod
+BINFLAGS = 755
+MANFLAGS = 644
 
-.PHONY: all32
-all32:
-	$(MAKE) -C $(PRGDIR) zstd32
-	$(MAKE) -C $(TESTDIR) all32
+# target directories - where to install executables and man pages to
 
-.PHONY: lib lib-release libzstd.a
-lib lib-release :
-	@$(MAKE) -C $(ZSTDDIR) $@
+#edit 1/15/19
+#prefix = /usr/local
+#BINDIR = $(prefix)/bin
+#MANEXT=1
+#MANDIR = $(prefix)/man/man$(MANEXT)
 
-.PHONY: zstd zstd-release
-zstd zstd-release:
-	@$(MAKE) -C $(PRGDIR) $@
-	cp $(PRGDIR)/zstd$(EXT) .
+ZIPMANUAL = zip.txt
+ZIPMANUALcloak = zipcloak.txt
+ZIPMANUALnote = zipnote.txt
+ZIPMANUALsplit = zipsplit.txt
+ZIPMANUALs = zip.txt zipcloak.txt zipnote.txt zipsplit.txt
+PKGDIR = IZzip
+VERSION = Version 3.0
 
-.PHONY: zstdmt
-zstdmt:
-	@$(MAKE) -C $(PRGDIR) $@
-	cp $(PRGDIR)/zstd$(EXT) ./zstdmt$(EXT)
+# Our bzip2 directory
+IZ_OUR_BZIP2_DIR = bzip2
 
-.PHONY: zlibwrapper
-zlibwrapper: lib
-	$(MAKE) -C $(ZWRAPDIR) all
+# flags
+#   CFLAGS    flags for C compile
+#   LFLAGS1   flags after output file spec, before obj file list
+#   LFLAGS2   flags after obj file list (libraries, etc)
+CFLAGS_NOOPT = -I. -DUNIX $(LOCAL_ZIP)
+CFLAGS = -O2 $(CFLAGS_NOOPT)
+LFLAGS1 =
+LFLAGS2 = -s
 
-## test: run long-duration tests
-.PHONY: test
-DEBUGLEVEL ?= 1
-test: MOREFLAGS += -g -DDEBUGLEVEL=$(DEBUGLEVEL) -Werror
-test:
-	MOREFLAGS="$(MOREFLAGS)" $(MAKE) -j -C $(PRGDIR) allVariants
-	$(MAKE) -C $(TESTDIR) $@
+# object file lists
+OBJZ = zip.o zipfile.o zipup.o fileio.o util.o globals.o crypt.o ttyio.o \
+       unix.o crc32.o zbz2err.o
+OBJI = deflate.o trees.o
+OBJA =
+OCRCU8 =
+OCRCTB = crc32_.o
+OBJU = zipfile_.o fileio_.o util_.o globals.o unix_.o $(OCRCU8)
+OBJN = zipnote.o  $(OBJU)
+OBJC = zipcloak.o $(OBJU) $(OCRCTB) crypt_.o ttyio.o
+OBJS = zipsplit.o $(OBJU)
 
-## shortest: same as `make check`
-.PHONY: shortest
-shortest:
-	$(MAKE) -C $(TESTDIR) $@
+ZIP_H = zip.h ziperr.h tailor.h unix/osdep.h
 
-## check: run basic tests for `zstd` cli
-.PHONY: check
-check: shortest
+# suffix rules
+.SUFFIXES:
+.SUFFIXES: _.o .o .c .doc .1
+.c_.o:
+	$(CC) -c $(CFLAGS) -DUTIL -o $@ $<
 
-## examples: build all examples in `/examples` directory
-.PHONY: examples
-examples: lib
-	CPPFLAGS=-I../lib LDFLAGS=-L../lib $(MAKE) -C examples/ all
+.c.o:
+	$(CC) -c $(CFLAGS) $<
 
-## manual: generate API documentation in html format
-.PHONY: manual
-manual:
-	$(MAKE) -C contrib/gen_html $@
+.1.doc:
+	nroff -man $< | col -bx | uniq > $@
 
-## man: generate man page
-.PHONY: man
-man:
-	$(MAKE) -C programs $@
+# rules for zip, zipnote, zipcloak, zipsplit, and the Zip MANUALs.
+$(OBJZ): $(ZIP_H)
+$(OBJI): $(ZIP_H)
+$(OBJN): $(ZIP_H)
+$(OBJS): $(ZIP_H)
+$(OBJC): $(ZIP_H)
+zip.o zipup.o zipfile.o fileio.o crc32.o crypt.o: crc32.h
+zipcloak.o zipfile_.o fileio_.o crc32_.o crypt_.o: crc32.h
+zip.o zipup.o crypt.o ttyio.o zipcloak.o crypt_.o: crypt.h
+zip.o zipup.o zipnote.o zipcloak.o zipsplit.o: revision.h
+zip.o crypt.o ttyio.o zipcloak.o crypt_.o: ttyio.h
+zipup.o: unix/zipup.h
 
-## contrib: build all supported projects in `/contrib` directory
-.PHONY: contrib
-contrib: lib
-	$(MAKE) -C contrib/pzstd all
-	$(MAKE) -C contrib/seekable_format/examples all
-	$(MAKE) -C contrib/adaptive-compression all
-	$(MAKE) -C contrib/largeNbDicts all
+match.o: match.S
+	$(CPP) match.S > _match.s
+	$(AS) _match.s
+	mv _match.o match.o
+	rm -f _match.s
 
-.PHONY: cleanTabs
-cleanTabs:
-	cd contrib; ./cleanTabs
+crc_i386.o: crc_i386.S
+	$(CPP) crc_i386.S > _crc_i386.s
+	$(AS) _crc_i386.s
+	mv _crc_i386.o crc_i386.o
+	rm -f _crc_i386.s
 
-.PHONY: clean
-clean:
-	@$(MAKE) -C $(ZSTDDIR) $@ > $(VOID)
-	@$(MAKE) -C $(PRGDIR) $@ > $(VOID)
-	@$(MAKE) -C $(TESTDIR) $@ > $(VOID)
-	@$(MAKE) -C $(ZWRAPDIR) $@ > $(VOID)
-	@$(MAKE) -C examples/ $@ > $(VOID)
-	@$(MAKE) -C contrib/gen_html $@ > $(VOID)
-	@$(MAKE) -C contrib/pzstd $@ > $(VOID)
-	@$(MAKE) -C contrib/seekable_format/examples $@ > $(VOID)
-	@$(MAKE) -C contrib/adaptive-compression $@ > $(VOID)
-	@$(MAKE) -C contrib/largeNbDicts $@ > $(VOID)
-	@$(RM) zstd$(EXT) zstdmt$(EXT) tmp*
-	@$(RM) -r lz4
-	@echo Cleaning completed
+unix.o: unix/unix.c
+	$(CC) -c $(CFLAGS) unix/unix.c
 
-#------------------------------------------------------------------------------
-# make install is validated only for Linux, macOS, Hurd and some BSD targets
-#------------------------------------------------------------------------------
-ifneq (,$(filter $(shell uname),Linux Darwin GNU/kFreeBSD GNU OpenBSD FreeBSD DragonFly NetBSD MSYS_NT Haiku))
+unix_.o: unix/unix.c
+	$(CC) -c $(CFLAGS) -DUTIL -o $@ unix/unix.c
 
-HOST_OS = POSIX
-CMAKE_PARAMS = -DZSTD_BUILD_CONTRIB:BOOL=ON -DZSTD_BUILD_STATIC:BOOL=ON -DZSTD_BUILD_TESTS:BOOL=ON -DZSTD_ZLIB_SUPPORT:BOOL=ON -DZSTD_LZMA_SUPPORT:BOOL=ON -DCMAKE_BUILD_TYPE=Release
+ZIPS = zip$E zipcloak$E zipnote$E zipsplit$E
 
-HAVE_COLORNEVER = $(shell echo a | egrep --color=never a > /dev/null 2> /dev/null && echo 1 || echo 0)
-EGREP_OPTIONS ?=
-ifeq ($HAVE_COLORNEVER, 1)
-EGREP_OPTIONS += --color=never
-endif
-EGREP = egrep $(EGREP_OPTIONS)
+zips: $(ZIPS)
+zipsman: $(ZIPS) $(ZIPMANUALs)
 
-# Print a two column output of targets and their description. To add a target description, put a
-# comment in the Makefile with the format "## <TARGET>: <DESCRIPTION>".  For example:
-#
-## list: Print all targets and their descriptions (if provided)
-.PHONY: list
-list:
-	@TARGETS=$$($(MAKE) -pRrq -f $(lastword $(MAKEFILE_LIST)) : 2>/dev/null \
-		| awk -v RS= -F: '/^# File/,/^# Finished Make data base/ {if ($$1 !~ "^[#.]") {print $$1}}' \
-		| $(EGREP) -v  -e '^[^[:alnum:]]' | sort); \
-	{ \
-	    printf "Target Name\tDescription\n"; \
-	    printf "%0.s-" {1..16}; printf "\t"; printf "%0.s-" {1..40}; printf "\n"; \
-	    for target in $$TARGETS; do \
-	        line=$$($(EGREP) "^##[[:space:]]+$$target:" $(lastword $(MAKEFILE_LIST))); \
-	        description=$$(echo $$line | awk '{i=index($$0,":"); print substr($$0,i+1)}' | xargs); \
-	        printf "$$target\t$$description\n"; \
-	    done \
-	} | column -t -s $$'\t'
+zip$E: $(OBJZ) $(OBJI) $(OBJA) $(LIB_BZ)
+	$(BIND) -o zip$E $(LFLAGS1) $(OBJZ) $(OBJI) $(OBJA) $(LFLAGS2)
 
-.PHONY: install clangtest armtest usan asan uasan
-install:
-	@$(MAKE) -C $(ZSTDDIR) $@
-	@$(MAKE) -C $(PRGDIR) $@
+zipnote$E: $(OBJN)
+	$(BIND) -o zipnote$E $(LFLAGS1) $(OBJN) $(LFLAGS2)
+zipcloak$E: $(OBJC) $(OCRCTB)
+	$(BIND) -o zipcloak$E $(LFLAGS1) $(OBJC) $(LFLAGS2)
+zipsplit$E: $(OBJS)
+	$(BIND) -o zipsplit$E $(LFLAGS1) $(OBJS) $(LFLAGS2)
 
-.PHONY: uninstall
+$(ZIPMANUAL): man/zip.1
+	nroff -man man/zip.1 | col -bx | uniq > $(ZIPMANUAL)
+
+$(ZIPMANUALcloak): man/zipcloak.1
+	nroff -man man/zipcloak.1 | col -bx | uniq > $(ZIPMANUALcloak)
+
+$(ZIPMANUALnote): man/zipnote.1
+	nroff -man man/zipnote.1 | col -bx | uniq > $(ZIPMANUALnote)
+
+$(ZIPMANUALsplit): man/zipsplit.1
+	nroff -man man/zipsplit.1 | col -bx | uniq > $(ZIPMANUALsplit)
+
+
+# bzip2 object library
+
+$(IZ_OUR_BZIP2_DIR)/libbz2.a : $(IZ_OUR_BZIP2_DIR)/Makefile
+	@echo "Building bzip2 object library..."
+	( cd $(IZ_OUR_BZIP2_DIR); \
+	  $(MAKE) CC="$(CC_BZ)" CFLAGS="$(CFLAGS_BZ)" libbz2.a )
+	@echo "   bzip2 object library created."
+
+
+# install
+install:        $(ZIPS)
+	-$(INSTALL_D) $(BINDIR)
+	$(INSTALL_PROGRAM) $(ZIPS) $(BINDIR)
+	-cd $(BINDIR); $(CHMOD) $(BINFLAGS) $(ZIPS)
+	-$(INSTALL_D) $(MANDIR)
+	$(INSTALL_PROGRAM) man/zip.1 $(MANDIR)/zip.$(MANEXT)
+	$(CHMOD) $(MANFLAGS) $(MANDIR)/zip.$(MANEXT)
+	$(INSTALL_PROGRAM) man/zipcloak.1 $(MANDIR)/zipcloak.$(MANEXT)
+	$(CHMOD) $(MANFLAGS) $(MANDIR)/zipcloak.$(MANEXT)
+	$(INSTALL_PROGRAM) man/zipnote.1 $(MANDIR)/zipnote.$(MANEXT)
+	$(CHMOD) $(MANFLAGS) $(MANDIR)/zipnote.$(MANEXT)
+	$(INSTALL_PROGRAM) man/zipsplit.1 $(MANDIR)/zipsplit.$(MANEXT)
+	$(CHMOD) $(MANFLAGS) $(MANDIR)/zipsplit.$(MANEXT)
+
 uninstall:
-	@$(MAKE) -C $(ZSTDDIR) $@
-	@$(MAKE) -C $(PRGDIR) $@
-
-.PHONY: travis-install
-travis-install:
-	$(MAKE) install PREFIX=~/install_test_dir
-
-.PHONY: gcc5build
-gcc5build: clean
-	gcc-5 -v
-	CC=gcc-5 $(MAKE) all MOREFLAGS="-Werror"
-
-.PHONY: gcc6build
-gcc6build: clean
-	gcc-6 -v
-	CC=gcc-6 $(MAKE) all MOREFLAGS="-Werror"
-
-.PHONY: gcc7build
-gcc7build: clean
-	gcc-7 -v
-	CC=gcc-7 $(MAKE) all MOREFLAGS="-Werror"
-
-.PHONY: clangbuild
-clangbuild: clean
-	clang -v
-	CXX=clang++ CC=clang $(MAKE) all MOREFLAGS="-Werror -Wconversion -Wno-sign-conversion -Wdocumentation"
-
-m32build: clean
-	gcc -v
-	$(MAKE) all32
-
-armbuild: clean
-	CC=arm-linux-gnueabi-gcc CFLAGS="-Werror" $(MAKE) allzstd
-
-aarch64build: clean
-	CC=aarch64-linux-gnu-gcc CFLAGS="-Werror" $(MAKE) allzstd
-
-ppcbuild: clean
-	CC=powerpc-linux-gnu-gcc CFLAGS="-m32 -Wno-attributes -Werror" $(MAKE) allzstd
-
-ppc64build: clean
-	CC=powerpc-linux-gnu-gcc CFLAGS="-m64 -Werror" $(MAKE) allzstd
-
-armfuzz: clean
-	CC=arm-linux-gnueabi-gcc QEMU_SYS=qemu-arm-static MOREFLAGS="-static" FUZZER_FLAGS=--no-big-tests $(MAKE) -C $(TESTDIR) fuzztest
-
-aarch64fuzz: clean
-	ld -v
-	CC=aarch64-linux-gnu-gcc QEMU_SYS=qemu-aarch64-static MOREFLAGS="-static" FUZZER_FLAGS=--no-big-tests $(MAKE) -C $(TESTDIR) fuzztest
-
-ppcfuzz: clean
-	CC=powerpc-linux-gnu-gcc QEMU_SYS=qemu-ppc-static MOREFLAGS="-static" FUZZER_FLAGS=--no-big-tests $(MAKE) -C $(TESTDIR) fuzztest
-
-ppc64fuzz: clean
-	CC=powerpc-linux-gnu-gcc QEMU_SYS=qemu-ppc64-static MOREFLAGS="-m64 -static" FUZZER_FLAGS=--no-big-tests $(MAKE) -C $(TESTDIR) fuzztest
-
-.PHONY: cxxtest
-cxxtest: CXXFLAGS += -Wall -Wextra -Wundef -Wshadow -Wcast-align -Werror
-cxxtest: clean
-	$(MAKE) -C $(PRGDIR) all CC="$(CXX) -Wno-deprecated" CFLAGS="$(CXXFLAGS)"   # adding -Wno-deprecated to avoid clang++ warning on dealing with C files directly
-
-gcc5test: clean
-	gcc-5 -v
-	$(MAKE) all CC=gcc-5 MOREFLAGS="-Werror"
-
-gcc6test: clean
-	gcc-6 -v
-	$(MAKE) all CC=gcc-6 MOREFLAGS="-Werror"
-
-clangtest: clean
-	clang -v
-	$(MAKE) all CXX=clang++ CC=clang MOREFLAGS="-Werror -Wconversion -Wno-sign-conversion -Wdocumentation"
-
-armtest: clean
-	$(MAKE) -C $(TESTDIR) datagen   # use native, faster
-	$(MAKE) -C $(TESTDIR) test CC=arm-linux-gnueabi-gcc QEMU_SYS=qemu-arm-static ZSTDRTTEST= MOREFLAGS="-Werror -static" FUZZER_FLAGS=--no-big-tests
-
-aarch64test:
-	$(MAKE) -C $(TESTDIR) datagen   # use native, faster
-	$(MAKE) -C $(TESTDIR) test CC=aarch64-linux-gnu-gcc QEMU_SYS=qemu-aarch64-static ZSTDRTTEST= MOREFLAGS="-Werror -static" FUZZER_FLAGS=--no-big-tests
-
-ppctest: clean
-	$(MAKE) -C $(TESTDIR) datagen   # use native, faster
-	$(MAKE) -C $(TESTDIR) test CC=powerpc-linux-gnu-gcc QEMU_SYS=qemu-ppc-static ZSTDRTTEST= MOREFLAGS="-Werror -Wno-attributes -static" FUZZER_FLAGS=--no-big-tests
-
-ppc64test: clean
-	$(MAKE) -C $(TESTDIR) datagen   # use native, faster
-	$(MAKE) -C $(TESTDIR) test CC=powerpc-linux-gnu-gcc QEMU_SYS=qemu-ppc64-static ZSTDRTTEST= MOREFLAGS="-m64 -static" FUZZER_FLAGS=--no-big-tests
-
-arm-ppc-compilation:
-	$(MAKE) -C $(PRGDIR) clean zstd CC=arm-linux-gnueabi-gcc QEMU_SYS=qemu-arm-static ZSTDRTTEST= MOREFLAGS="-Werror -static"
-	$(MAKE) -C $(PRGDIR) clean zstd CC=aarch64-linux-gnu-gcc QEMU_SYS=qemu-aarch64-static ZSTDRTTEST= MOREFLAGS="-Werror -static"
-	$(MAKE) -C $(PRGDIR) clean zstd CC=powerpc-linux-gnu-gcc QEMU_SYS=qemu-ppc-static ZSTDRTTEST= MOREFLAGS="-Werror -Wno-attributes -static"
-	$(MAKE) -C $(PRGDIR) clean zstd CC=powerpc-linux-gnu-gcc QEMU_SYS=qemu-ppc64-static ZSTDRTTEST= MOREFLAGS="-m64 -static"
-
-regressiontest:
-	$(MAKE) -C $(FUZZDIR) regressiontest
-
-uasanregressiontest:
-	$(MAKE) -C $(FUZZDIR) regressiontest CC=clang CXX=clang++ CFLAGS="-O3 -fsanitize=address,undefined" CXXFLAGS="-O3 -fsanitize=address,undefined"
-
-msanregressiontest:
-	$(MAKE) -C $(FUZZDIR) regressiontest CC=clang CXX=clang++ CFLAGS="-O3 -fsanitize=memory" CXXFLAGS="-O3 -fsanitize=memory"
-
-# run UBsan with -fsanitize-recover=signed-integer-overflow
-# due to a bug in UBsan when doing pointer subtraction
-# https://gcc.gnu.org/bugzilla/show_bug.cgi?id=63303
-
-usan: clean
-	$(MAKE) test CC=clang MOREFLAGS="-g -fno-sanitize-recover=all -fsanitize-recover=signed-integer-overflow -fsanitize=undefined -Werror"
-
-asan: clean
-	$(MAKE) test CC=clang MOREFLAGS="-g -fsanitize=address -Werror"
-
-asan-%: clean
-	LDFLAGS=-fuse-ld=gold MOREFLAGS="-g -fno-sanitize-recover=all -fsanitize=address -Werror" $(MAKE) -C $(TESTDIR) $*
-
-msan: clean
-	$(MAKE) test CC=clang MOREFLAGS="-g -fsanitize=memory -fno-omit-frame-pointer -Werror" HAVE_LZMA=0   # datagen.c fails this test for no obvious reason
-
-msan-%: clean
-	LDFLAGS=-fuse-ld=gold MOREFLAGS="-g -fno-sanitize-recover=all -fsanitize=memory -fno-omit-frame-pointer -Werror" FUZZER_FLAGS=--no-big-tests $(MAKE) -C $(TESTDIR) HAVE_LZMA=0 $*
-
-asan32: clean
-	$(MAKE) -C $(TESTDIR) test32 CC=clang MOREFLAGS="-g -fsanitize=address"
-
-uasan: clean
-	$(MAKE) test CC=clang MOREFLAGS="-g -fno-sanitize-recover=all -fsanitize-recover=signed-integer-overflow -fsanitize=address,undefined -Werror"
-
-uasan-%: clean
-	LDFLAGS=-fuse-ld=gold MOREFLAGS="-g -fno-sanitize-recover=all -fsanitize-recover=signed-integer-overflow -fsanitize=address,undefined -Werror" $(MAKE) -C $(TESTDIR) $*
-
-tsan-%: clean
-	LDFLAGS=-fuse-ld=gold MOREFLAGS="-g -fno-sanitize-recover=all -fsanitize=thread -Werror" $(MAKE) -C $(TESTDIR) $* FUZZER_FLAGS=--no-big-tests
-
-apt-install:
-	sudo apt-get -yq --no-install-suggests --no-install-recommends --force-yes install $(APT_PACKAGES)
-
-apt-add-repo:
-	sudo add-apt-repository -y ppa:ubuntu-toolchain-r/test
-	sudo apt-get update -y -qq
-
-ppcinstall:
-	APT_PACKAGES="qemu-system-ppc qemu-user-static gcc-powerpc-linux-gnu" $(MAKE) apt-install
-
-arminstall:
-	APT_PACKAGES="qemu-system-arm qemu-user-static gcc-arm-linux-gnueabi libc6-dev-armel-cross gcc-aarch64-linux-gnu libc6-dev-arm64-cross" $(MAKE) apt-install
-
-valgrindinstall:
-	APT_PACKAGES="valgrind" $(MAKE) apt-install
-
-libc6install:
-	APT_PACKAGES="libc6-dev-i386 gcc-multilib" $(MAKE) apt-install
-
-gcc6install: apt-add-repo
-	APT_PACKAGES="libc6-dev-i386 gcc-multilib gcc-6 gcc-6-multilib" $(MAKE) apt-install
-
-gcc7install: apt-add-repo
-	APT_PACKAGES="libc6-dev-i386 gcc-multilib gcc-7 gcc-7-multilib" $(MAKE) apt-install
-
-gcc8install: apt-add-repo
-	APT_PACKAGES="libc6-dev-i386 gcc-multilib gcc-8 gcc-8-multilib" $(MAKE) apt-install
-
-gpp6install: apt-add-repo
-	APT_PACKAGES="libc6-dev-i386 g++-multilib gcc-6 g++-6 g++-6-multilib" $(MAKE) apt-install
-
-clang38install:
-	APT_PACKAGES="clang-3.8" $(MAKE) apt-install
-
-# Ubuntu 14.04 ships a too-old lz4
-lz4install:
-	[ -e lz4 ] || git clone https://github.com/lz4/lz4 && sudo $(MAKE) -C lz4 install
-
-endif
+	-cd $(BINDIR); rm -f $(ZIPS)
+	-cd $(MANDIR); rm -f \
+	 zip.$(MANEXT) zipcloak.$(MANEXT) zipnote.$(MANEXT) zipsplit.$(MANEXT)
 
 
-ifneq (,$(filter MSYS%,$(shell uname)))
-HOST_OS = MSYS
-CMAKE_PARAMS = -G"MSYS Makefiles" -DZSTD_MULTITHREAD_SUPPORT:BOOL=OFF -DZSTD_BUILD_STATIC:BOOL=ON -DZSTD_BUILD_TESTS:BOOL=ON
-endif
+flags:  unix/configure
+	sh unix/configure "${CC}" "${CFLAGS_NOOPT}" "${IZ_BZIP2}"
 
+# These symbols, when #defined using -D have these effects on compilation:
+# ZMEM                  - includes C language versions of memset(), memcpy(),
+#                         and memcmp() (util.c).
+# HAVE_DIRENT_H         - use <dirent.h> instead of <sys/dir.h>
+# NODIR                 - for 3B1, which has neither getdents() nor opendir().
+# HAVE_NDIR_H           - use <ndir.h> (unix/unix.c).
+# HAVE_SYS_DIR_H        - use <sys/dir.h>
+# HAVE_SYS_NDIR_H       - use <sys/ndir.h>
+# UTIL                  - select routines for utilities (note, cloak, split)
+# NO_RMDIR              - remove directories using a system("rmdir ...") call.
+# NO_PROTO              - cannot handle ANSI prototypes
+# NO_CONST              - cannot handle ANSI const
+# NO_LARGE_FILE_SUPPORT - do not enable Large File support even if available.
+# NO_ZIP64_SUPPORT      - do not enable Zip64 archive support even if available.
+# NO_UNICODE_SUPPORT    - do not enable Unicode support even if available.
+# NO_BZIP2_SUPPORT      - do not compile in bzip2 code even if available.
 
-#------------------------------------------------------------------------
-# target specific tests
-#------------------------------------------------------------------------
-ifneq (,$(filter $(HOST_OS),MSYS POSIX))
-cmakebuild:
-	cmake --version
-	$(RM) -r $(BUILDIR)/cmake/build
-	mkdir $(BUILDIR)/cmake/build
-	cd $(BUILDIR)/cmake/build ; cmake -DCMAKE_INSTALL_PREFIX:PATH=~/install_test_dir $(CMAKE_PARAMS) .. ; $(MAKE) install ; $(MAKE) uninstall
+#               Generic targets:
 
-c90build: clean
-	$(CC) -v
-	CFLAGS="-std=c90 -Werror" $(MAKE) allmost  # will fail, due to missing support for `long long`
+generic: flags
+	eval $(MAKE) $(MAKEF) zips `cat flags`
+	$(BUILD_D)
+	$(MOVE_BUILD_FILES)
 
-gnu90build: clean
-	$(CC) -v
-	CFLAGS="-std=gnu90 -Werror" $(MAKE) allmost
+generic_gcc:
+	$(MAKE) $(MAKEF) generic CC=gcc CPP="gcc -E"
 
-c99build: clean
-	$(CC) -v
-	CFLAGS="-std=c99 -Werror" $(MAKE) allmost
+# AT&T 6300 PLUS (don't know yet how to allocate 64K bytes):
+att6300nodir:
+	$(MAKE) $(MAKEF) zips LFLAGS1="-Ml -s" \
+	CFLAGS="-DUNIX -I. -O -Ml -DNO_RMDIR -DDYN_ALLOC -DMEDIUM_MEM \
+-DWSIZE=16384 -DNO_STDLIB_H -DNO_STDDEF_H -DNO_RENAME \
+-DNO_MKTIME -DNO_SIZE_T -DNO_VOID -DNO_PROTO -DNO_DIR \
+-DNO_CONST -DHAVE_TERMIO_H" \
+	"LFLAGS2="
 
-gnu99build: clean
-	$(CC) -v
-	CFLAGS="-std=gnu99 -Werror" $(MAKE) allmost
+# Coherent (AS definition not needed for gcc)
+coherent:
+	$(MAKE) $(MAKEF) zips CFLAGS="-DUNIX -I. -O -DDIRENT -DASMV" \
+	 AS="as -gx" OBJA=match.o
 
-c11build: clean
-	$(CC) -v
-	CFLAGS="-std=c11 -Werror" $(MAKE) allmost
+# Cray Unicos 6.1, Standard C compiler 3.0 (all routines except trees.c
+# may be compiled with vector3; internal compiler bug in 3.0.2.3 and
+# earlier requires vector2 for trees.c)
+cray_v3:
+	$(MAKE) $(MAKEF) zips CC="scc" \
+		CFLAGS="-DUNIX -I. -O -h vector2 -h scalar3 -DHAVE_DIRENT_H"
 
-bmix64build: clean
-	$(CC) -v
-	CFLAGS="-O3 -mbmi -Werror" $(MAKE) -C $(TESTDIR) test
+# Cygwin
+cygwin:
+	$(MAKE) $(MAKEF) generic CC="gcc" CPP="gcc -E" EXE=".exe"
 
-bmix32build: clean
-	$(CC) -v
-	CFLAGS="-O3 -mbmi -mx32 -Werror" $(MAKE) -C $(TESTDIR) test
+# LynxOS
+lynx:
+	$(MAKE) $(MAKEF) generic CC=gcc CPP="gcc -E" CFLAGS="$(CFLAGS) \
+	 -DNO_UNDERLINE -DLynx -DLYNX LFLAGS2="$LFLAGS2 -lc_p"
 
-bmi32build: clean
-	$(CC) -v
-	CFLAGS="-O3 -mbmi -m32 -Werror" $(MAKE) -C $(TESTDIR) test
+# MINIX 1.5.10 with Bruce Evans 386 patches and gcc/GNU make
+minix:
+	$(MAKE) $(MAKEF) zips CFLAGS="-DUNIX -I. -O -DDIRENT -DMINIX" CC=gcc
+	chmem =262144 zip
 
-# static analyzer test uses clang's scan-build
-# does not analyze zlibWrapper, due to detected issues in zlib source code
-staticAnalyze: SCANBUILD ?= scan-build
-staticAnalyze:
-	$(CC) -v
-	CC=$(CC) CPPFLAGS=-g $(SCANBUILD) --status-bugs -v $(MAKE) allzstd examples contrib
-endif
+# IBM OS/390 (formerly MVS) compiled under "OpenEdition" shell
+# You can make the zip executable with IBM's make, but you will
+# get errors dealing with the _.o targets for the other executables
+# (zipcloak, etc).  GNU make will build all the executables.
+# If you have GNU make in your path as gmake, you can uncomment
+# the following, but it shouldn't be needed:
+#MAKE = gmake
+
+os390:
+	$(MAKE) $(MAKEF) zips CFLAGS="$(CF) -I. -DUNIX -DOS390 -DEBCDIC \
+	 -DSYSV -DNO_PARAM_H" LFLAGS2=""
+
+# QNX is "special" because out /bin/sh is ksh and it doesn't grok the
+# configure script properly, generating a bad flags file.  D'oh! [cjh]
+#
+# QNX/Neutrino is "special" because you don't have any native development
+# tools yet.  Set ARCH to "x86", "ppcbe", "ppcle", "mipsbe", or "mipsle"
+# to produce x86, PowerPC (big- or little-endian) and MIPS (big-
+# or little-endian) using gcc. [cjh]
+qnx:
+	$(MAKE) $(MAKEF) zips LN=ln CC=cc CFLAGS="-DUNIX -I. -O \
+	 -DHAVE_DIRENT_H -DHAVE_TERMIOS_H -DNO_MKTEMP"
+
+qnxnto:
+	@if [ "$(ARCH)" = "" ] ; then \
+		echo "You didn't set ARCH; I'll assume you meant ARCH=x86..." ; \
+		echo "" ; \
+		$(MAKE) $(MAKEF) zips LN=ln CC="qcc -Vgcc_ntox86" \
+			CFLAGS="-g -DUNIX -I. -O -DHAVE_DIRENT_H -DHAVE_TERMIOS_H -DNO_MKTEMP" \
+			LFLAGS2=-g ; \
+	else \
+		echo "Making zip for $(ARCH)..." ; \
+		echo "" ; \
+		$(MAKE) $(MAKEF) zips LN=ln CC="qcc -Vgcc_nto$(ARCH)" \
+			CFLAGS="-g -DUNIX -I. -O -DHAVE_DIRENT_H -DHAVE_TERMIOS_H -DNO_MKTEMP" \
+			LFLAGS2=-g ; \
+	fi
+
+# Solaris:  Generic, plus generation of installable package.
+solaris:	generic svr4package
+
+# Solaris with GCC: generic_gcc, plus generation of installable package
+solaris_gcc:	generic_gcc svr4package
+
+# Package generation interface (by JBush). Originally tested under Sun Solaris.
+# Other SVr4s may be very similar, and could possibly use this.
+# Note:  Expects version info to be stored in VERSION macro variable.
+# See "README" under ./unix/Packaging
+svr4package:
+	@echo "Creating SVR4 package for Unix ..."
+	-@rm -rf ./$(PKGDIR) ./$(PKGDIR)_`uname -p`.pkg
+	-@sed -e "s/.VERSION./$(VERSION)/g" \
+	      -e "s/.PSTAMP./$(LOGNAME)_`date | tr  ' ' '_'`/g" \
+	      -e "s/.ARCH./Solaris_`uname -rp | tr ' ' ','`/g" \
+	      ./unix/Packaging/pkginfo.in > ./unix/Packaging/pkginfo
+	-@sed -e "s/.ARCH./`uname -p`/g" \
+	      ./unix/Packaging/preinstall.in > ./unix/Packaging/preinstall
+	/usr/bin/pkgmk -d . -b . -r . -f ./unix/Packaging/prototype $(PKGDIR)
+	/usr/bin/pkgtrans -o -s . $(PKGDIR)_`uname -p`.pkg $(PKGDIR)
+	@echo " "
+	@echo "To install, copy $(PKGDIR)_`uname -p`.pkg to the target system, and"
+	@echo "issue the command (as root):  pkgadd -d $(PKGDIR)_`uname -p`.pkg"
+	@echo " "
+
+# make a distribution
+dist:	$(ZIPMANUAL)
+	eval zip -r9 zip`sed -e '/VERSION/!d' -e 's/.*"\(.*\)".*/\1/' \
+			  -e 's/[.]//g' -e 's/ .*//g' -e q revision.h` *
+
+# clean up after making stuff and installing it
+clean:
+	rm -f *.o $(ZIPS) flags
+	rm -rf $(PKGDIR)
+
+clean_bzip2 :
+	@if test -f "$(IZ_OUR_BZIP2_DIR)/Makefile"; then \
+	  ( cd $(IZ_OUR_BZIP2_DIR); make clean ); \
+	else \
+          if test -z "$(IZ_OUR_BZIP2_DIR)"; then \
+	    echo "No bzip2 directory (\"IZ_OUR_BZIP2_DIR\") specified."; \
+	  else \
+	    echo "No bzip2 make file found: $(IZ_OUR_BZIP2_DIR)/Makefile."; \
+	  fi; \
+	fi
+
+clean_exe :
+	rm -f $(ZIPS)
+#
+
