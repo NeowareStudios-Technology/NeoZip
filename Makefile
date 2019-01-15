@@ -323,6 +323,7 @@ dist:	$(ZIPMANUAL)
 clean:
 	rm -f *.o $(ZIPS) flags
 	rm -rf $(PKGDIR)
+	rm -rf ObjectFiles
 
 clean_bzip2 :
 	@if test -f "$(IZ_OUR_BZIP2_DIR)/Makefile"; then \
