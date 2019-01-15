@@ -33,9 +33,9 @@ INSTALL_PROGRAM = cp
 # probably can change this to 'install -d' if you have it
 # XXX NextStep 3.3 and Openstep 4.x don't know about -p !
 
-#edit 1/15/19 (move all build files into "Build" directory)
-BUILD_D = mkdir Build
-MOVE_BUILD_FILES = mv flags* zip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o zipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o Build/
+#edit 1/15/19 (move all object files into "ObjectFiles" directory)
+OBJECT_D = mkdir ObjectFiles
+MOVE_OBJECT_FILES = mv flags* zip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o zipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o ObjectFiles/
 
 INSTALL_D = mkdir -p
 CHMOD = chmod
@@ -209,8 +209,8 @@ flags:  unix/configure
 
 generic: flags
 	eval $(MAKE) $(MAKEF) zips `cat flags`
-	$(BUILD_D)
-	$(MOVE_BUILD_FILES)
+	$(OBJECT_D)
+	$(MOVE_OBJECT_FILES)
 
 generic_gcc:
 	$(MAKE) $(MAKEF) generic CC=gcc CPP="gcc -E"
