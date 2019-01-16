@@ -35,7 +35,7 @@ INSTALL_PROGRAM = cp
 
 #edit 1/15/19 (move all object files into "object" directory)
 OBJECT_D = mkdir object
-MOVE_OBJECT_FILES = mv flags* neozip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o zipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o object/
+MOVE_OBJECT_FILES = mv flags* neozip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o neozipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o object/
 
 INSTALL_D = mkdir -p
 CHMOD = chmod
@@ -51,10 +51,10 @@ MANFLAGS = 644
 #MANDIR = $(prefix)/man/man$(MANEXT)
 
 ZIPMANUAL = zip.txt
-ZIPMANUALcloak = zipcloak.txt
+ZIPMANUALcloak = neozipcloak.txt
 ZIPMANUALnote = zipnote.txt
 ZIPMANUALsplit = zipsplit.txt
-ZIPMANUALs = zip.txt zipcloak.txt zipnote.txt zipsplit.txt
+ZIPMANUALs = neozip.txt neozipcloak.txt neozipnote.txt neozipsplit.txt
 PKGDIR = IZzip
 VERSION = Version 3.0
 
@@ -79,7 +79,7 @@ OCRCU8 =
 OCRCTB = crc32_.o
 OBJU = zipfile_.o fileio_.o util_.o globals.o unix_.o $(OCRCU8)
 OBJN = zipnote.o  $(OBJU)
-OBJC = zipcloak.o $(OBJU) $(OCRCTB) crypt_.o ttyio.o
+OBJC = neozipcloak.o $(OBJU) $(OCRCTB) crypt_.o ttyio.o
 OBJS = zipsplit.o $(OBJU)
 
 ZIP_H = neozip.h ziperr.h tailor.h unix/osdep.h
@@ -96,17 +96,17 @@ ZIP_H = neozip.h ziperr.h tailor.h unix/osdep.h
 .1.doc:
 	nroff -man $< | col -bx | uniq > $@
 
-# rules for zip, zipnote, zipcloak, zipsplit, and the Zip MANUALs.
+# rules for neozip, zipnote, neozipcloak, zipsplit, and the Zip MANUALs.
 $(OBJZ): $(ZIP_H)
 $(OBJI): $(ZIP_H)
 $(OBJN): $(ZIP_H)
 $(OBJS): $(ZIP_H)
 $(OBJC): $(ZIP_H)
 neozip.o zipup.o zipfile.o fileio.o crc32.o crypt.o: crc32.h
-zipcloak.o zipfile_.o fileio_.o crc32_.o crypt_.o: crc32.h
-neozip.o zipup.o crypt.o ttyio.o zipcloak.o crypt_.o: crypt.h
-neozip.o zipup.o zipnote.o zipcloak.o zipsplit.o: revision.h
-neozip.o crypt.o ttyio.o zipcloak.o crypt_.o: ttyio.h
+neozipcloak.o zipfile_.o fileio_.o crc32_.o crypt_.o: crc32.h
+neozip.o zipup.o crypt.o ttyio.o neozipcloak.o crypt_.o: crypt.h
+neozip.o zipup.o zipnote.o neozipcloak.o zipsplit.o: revision.h
+neozip.o crypt.o ttyio.o neozipcloak.o crypt_.o: ttyio.h
 zipup.o: unix/zipup.h
 
 match.o: match.S
@@ -255,7 +255,7 @@ minix:
 # IBM OS/390 (formerly MVS) compiled under "OpenEdition" shell
 # You can make the zip executable with IBM's make, but you will
 # get errors dealing with the _.o targets for the other executables
-# (zipcloak, etc).  GNU make will build all the executables.
+# (neozipcloak, etc).  GNU make will build all the executables.
 # If you have GNU make in your path as gmake, you can uncomment
 # the following, but it shouldn't be needed:
 #MAKE = gmake
