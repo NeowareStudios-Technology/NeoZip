@@ -7,4 +7,4 @@
 ```
 make -f Makefile generic
 ```
-3. executable files will be in root directory, object files will be in ObjectFiles directory
+3. executable files will be in root directory, object files will be in object sub-directory
