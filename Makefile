@@ -37,7 +37,7 @@ INSTALL_PROGRAM = cp
 OBJECT_D = mkdir object
 MOVE_OBJECT_FILES = mv flags* neozip.o neozipfile.o zipup.o fileio.o util.o crc32.o crypt.o\
 					deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o neozipcloak.o fileio_.o\
-					neozipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o object/
+					neozipfile_.o crc32_.o crypt_.o unix_.o util_.o neozipnote.o zipsplit.o object/
 
 INSTALL_D = mkdir -p
 CHMOD = chmod
@@ -54,7 +54,7 @@ MANFLAGS = 644
 
 ZIPMANUAL = zip.txt
 ZIPMANUALcloak = neozipcloak.txt
-ZIPMANUALnote = zipnote.txt
+ZIPMANUALnote = neozipnote.txt
 ZIPMANUALsplit = zipsplit.txt
 ZIPMANUALs = neozip.txt neozipcloak.txt neozipnote.txt neozipsplit.txt
 PKGDIR = IZzip
@@ -80,7 +80,7 @@ OBJA =
 OCRCU8 =
 OCRCTB = crc32_.o
 OBJU = neozipfile_.o fileio_.o util_.o globals.o unix_.o $(OCRCU8)
-OBJN = zipnote.o  $(OBJU)
+OBJN = neozipnote.o  $(OBJU)
 OBJC = neozipcloak.o $(OBJU) $(OCRCTB) crypt_.o ttyio.o
 OBJS = zipsplit.o $(OBJU)
 
@@ -98,7 +98,7 @@ ZIP_H = neozip.h ziperr.h tailor.h unix/osdep.h
 .1.doc:
 	nroff -man $< | col -bx | uniq > $@
 
-# rules for neozip, zipnote, neozipcloak, zipsplit, and the Zip MANUALs.
+# rules for neozip, neozipnote, neozipcloak, zipsplit, and the Zip MANUALs.
 $(OBJZ): $(ZIP_H)
 $(OBJI): $(ZIP_H)
 $(OBJN): $(ZIP_H)
@@ -107,7 +107,7 @@ $(OBJC): $(ZIP_H)
 neozip.o zipup.o neozipfile.o fileio.o crc32.o crypt.o: crc32.h
 neozipcloak.o neozipfile_.o fileio_.o crc32_.o crypt_.o: crc32.h
 neozip.o zipup.o crypt.o ttyio.o neozipcloak.o crypt_.o: crypt.h
-neozip.o zipup.o zipnote.o neozipcloak.o zipsplit.o: revision.h
+neozip.o zipup.o neozipnote.o neozipcloak.o zipsplit.o: revision.h
 neozip.o crypt.o ttyio.o neozipcloak.o crypt_.o: ttyio.h
 zipup.o: unix/zipup.h
 

@@ -1,5 +1,5 @@
 /*
-  zipfile.c - Zip 3
+  neozipfile.c - Zip 3
 
   Copyright (c) 1990-2008 Info-ZIP.  All rights reserved.
 
