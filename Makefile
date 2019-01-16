@@ -136,11 +136,11 @@ zip$E: $(OBJZ) $(OBJI) $(OBJA) $(LIB_BZ)
 	$(BIND) -o zip$E $(LFLAGS1) $(OBJZ) $(OBJI) $(OBJA) $(LFLAGS2)
 
 zipnote$E: $(OBJN)
-	$(BIND) -o zipnote$E $(LFLAGS1) $(OBJN) $(LFLAGS2)
+	$(BIND) -o neozipnote$E $(LFLAGS1) $(OBJN) $(LFLAGS2)
 zipcloak$E: $(OBJC) $(OCRCTB)
-	$(BIND) -o zipcloak$E $(LFLAGS1) $(OBJC) $(LFLAGS2)
+	$(BIND) -o neozipcloak$E $(LFLAGS1) $(OBJC) $(LFLAGS2)
 zipsplit$E: $(OBJS)
-	$(BIND) -o zipsplit$E $(LFLAGS1) $(OBJS) $(LFLAGS2)
+	$(BIND) -o neozipsplit$E $(LFLAGS1) $(OBJS) $(LFLAGS2)
 
 $(ZIPMANUAL): man/zip.1
 	nroff -man man/zip.1 | col -bx | uniq > $(ZIPMANUAL)
