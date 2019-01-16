@@ -1,4 +1,4 @@
-# Makefile for Zip, ZipNote, ZipCloak and ZipSplit
+# Makefile for NeoZip, NeoZipNote, NeoZipCloak and NeoZipSplit
 
 # what you can make ...
 all:
@@ -33,9 +33,9 @@ INSTALL_PROGRAM = cp
 # probably can change this to 'install -d' if you have it
 # XXX NextStep 3.3 and Openstep 4.x don't know about -p !
 
-#edit 1/15/19 (move all object files into "ObjectFiles" directory)
-OBJECT_D = mkdir ObjectFiles
-MOVE_OBJECT_FILES = mv flags* zip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o zipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o ObjectFiles/
+#edit 1/15/19 (move all object files into "object" directory)
+OBJECT_D = mkdir object
+MOVE_OBJECT_FILES = mv flags* zip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o zipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o object/
 
 INSTALL_D = mkdir -p
 CHMOD = chmod
@@ -44,7 +44,7 @@ MANFLAGS = 644
 
 # target directories - where to install executables and man pages to
 
-#edit 1/15/19
+#remove all references to /usr/local 1/15/19 Lee
 #prefix = /usr/local
 #BINDIR = $(prefix)/bin
 #MANEXT=1
@@ -133,7 +133,7 @@ zips: $(ZIPS)
 zipsman: $(ZIPS) $(ZIPMANUALs)
 
 zip$E: $(OBJZ) $(OBJI) $(OBJA) $(LIB_BZ)
-	$(BIND) -o zip$E $(LFLAGS1) $(OBJZ) $(OBJI) $(OBJA) $(LFLAGS2)
+	$(BIND) -o neozip$E $(LFLAGS1) $(OBJZ) $(OBJI) $(OBJA) $(LFLAGS2)
 
 zipnote$E: $(OBJN)
 	$(BIND) -o neozipnote$E $(LFLAGS1) $(OBJN) $(LFLAGS2)
@@ -179,10 +179,12 @@ install:        $(ZIPS)
 	$(INSTALL_PROGRAM) man/zipsplit.1 $(MANDIR)/zipsplit.$(MANEXT)
 	$(CHMOD) $(MANFLAGS) $(MANDIR)/zipsplit.$(MANEXT)
 
-uninstall:
-	-cd $(BINDIR); rm -f $(ZIPS)
-	-cd $(MANDIR); rm -f \
+#removes all neozip related .exe files 1/16/19 Lee
+	#-cd $(BINDIR); rm -f $(ZIPS)
+	#-cd $(MANDIR); rm -f \
 	 zip.$(MANEXT) zipcloak.$(MANEXT) zipnote.$(MANEXT) zipsplit.$(MANEXT)
+uninstall:
+	rm neozip neozipcloak neozipnote neozipsplit
 
 
 flags:  unix/configure
@@ -206,7 +208,7 @@ flags:  unix/configure
 # NO_BZIP2_SUPPORT      - do not compile in bzip2 code even if available.
 
 #               Generic targets:
-
+#added to generic command: creat object dir, move object files to object dir 1/15/19 Lee
 generic: flags
 	eval $(MAKE) $(MAKEF) zips `cat flags`
 	$(OBJECT_D)
@@ -320,10 +322,11 @@ dist:	$(ZIPMANUAL)
 			  -e 's/[.]//g' -e 's/ .*//g' -e q revision.h` *
 
 # clean up after making stuff and installing it
+#remove object folder 1/16/19 Lee
 clean:
 	rm -f *.o $(ZIPS) flags
 	rm -rf $(PKGDIR)
-	rm -rf ObjectFiles
+	rm -rf object
 
 clean_bzip2 :
 	@if test -f "$(IZ_OUR_BZIP2_DIR)/Makefile"; then \
