@@ -1,5 +1,5 @@
 /*
-  zip.h - Zip 3
+  neozip.h - Zip 3
 
 /---------------------------------------------------------------------/
 
@@ -73,8 +73,8 @@ freely, subject to the above disclaimer and the following restrictions:
 /*
  *  zip.h by Mark Adler
  */
-#ifndef __zip_h
-#define __zip_h 1
+#ifndef __neozip_h
+#define __neozip_h 1
 
 #define ZIP   /* for crypt.c:  include zip password functions, not unzip */
 
@@ -1077,5 +1077,5 @@ int insert_arg OF ((char ***args, ZCONST char *arg, int insert_at,
   --------------------------------------------------------------------*/
 
 
-#endif /* !__zip_h */
-/* end of zip.h */
+#endif /* !__neozip_h */
+/* end of neozip.h */

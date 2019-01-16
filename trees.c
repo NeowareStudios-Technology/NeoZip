@@ -4,7 +4,7 @@
   Copyright (c) 1990-2007 Info-ZIP.  All rights reserved.
 
   See the accompanying file LICENSE, version 2005-Feb-10 or later
-  (the contents of which are also included in zip.h) for terms of use.
+  (the contents of which are also included in neozip.h) for terms of use.
   If, for some reason, all these files are missing, the Info-ZIP license
   also may be found at:  ftp://ftp.info-zip.org/pub/infozip/license.html
 */
@@ -117,11 +117,11 @@
  */
 #define __TREES_C
 
-/* Put zip.h first as when using 64-bit file environment in unix ctype.h
+/* Put neozip.h first as when using 64-bit file environment in unix ctype.h
    defines off_t and then while other files are using an 8-byte off_t this
-   file gets a 4-byte off_t.  Once zip.h sets the large file defines can
+   file gets a 4-byte off_t.  Once neozip.h sets the large file defines can
    then include ctype.h and get 8-byte off_t.  8/14/04 EG */
-#include "zip.h"
+#include "neozip.h"
 #include <ctype.h>
 
 #ifndef USE_ZLIB

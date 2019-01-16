@@ -35,7 +35,7 @@ INSTALL_PROGRAM = cp
 
 #edit 1/15/19 (move all object files into "object" directory)
 OBJECT_D = mkdir object
-MOVE_OBJECT_FILES = mv flags* zip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o zipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o object/
+MOVE_OBJECT_FILES = mv flags* neozip.o zipfile.o zipup.o fileio.o util.o crc32.o crypt.o deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o zipcloak.o fileio_.o zipfile_.o crc32_.o crypt_.o unix_.o util_.o zipnote.o zipsplit.o object/
 
 INSTALL_D = mkdir -p
 CHMOD = chmod
@@ -71,7 +71,7 @@ LFLAGS1 =
 LFLAGS2 = -s
 
 # object file lists
-OBJZ = zip.o zipfile.o zipup.o fileio.o util.o globals.o crypt.o ttyio.o \
+OBJZ = neozip.o zipfile.o zipup.o fileio.o util.o globals.o crypt.o ttyio.o \
        unix.o crc32.o zbz2err.o
 OBJI = deflate.o trees.o
 OBJA =
@@ -82,7 +82,7 @@ OBJN = zipnote.o  $(OBJU)
 OBJC = zipcloak.o $(OBJU) $(OCRCTB) crypt_.o ttyio.o
 OBJS = zipsplit.o $(OBJU)
 
-ZIP_H = zip.h ziperr.h tailor.h unix/osdep.h
+ZIP_H = neozip.h ziperr.h tailor.h unix/osdep.h
 
 # suffix rules
 .SUFFIXES:
@@ -102,11 +102,11 @@ $(OBJI): $(ZIP_H)
 $(OBJN): $(ZIP_H)
 $(OBJS): $(ZIP_H)
 $(OBJC): $(ZIP_H)
-zip.o zipup.o zipfile.o fileio.o crc32.o crypt.o: crc32.h
+neozip.o zipup.o zipfile.o fileio.o crc32.o crypt.o: crc32.h
 zipcloak.o zipfile_.o fileio_.o crc32_.o crypt_.o: crc32.h
-zip.o zipup.o crypt.o ttyio.o zipcloak.o crypt_.o: crypt.h
-zip.o zipup.o zipnote.o zipcloak.o zipsplit.o: revision.h
-zip.o crypt.o ttyio.o zipcloak.o crypt_.o: ttyio.h
+neozip.o zipup.o crypt.o ttyio.o zipcloak.o crypt_.o: crypt.h
+neozip.o zipup.o zipnote.o zipcloak.o zipsplit.o: revision.h
+neozip.o crypt.o ttyio.o zipcloak.o crypt_.o: ttyio.h
 zipup.o: unix/zipup.h
 
 match.o: match.S

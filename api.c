@@ -4,7 +4,7 @@
   Copyright (c) 1990-2007 Info-ZIP.  All rights reserved.
 
   See the accompanying file LICENSE, version 2007-Mar-4 or later
-  (the contents of which are also included in zip.h) for terms of use.
+  (the contents of which are also included in neozip.h) for terms of use.
   If, for some reason, all these files are missing, the Info-ZIP license
   also may be found at:  ftp://ftp.info-zip.org/pub/infozip/license.html
 */
@@ -44,7 +44,7 @@
 #endif
 #include <direct.h>
 #include <ctype.h>
-#include "api.h"                /* this includes zip.h */
+#include "api.h"                /* this includes neozip.h */
 #include "crypt.h"
 #include "revision.h"
 #ifdef USE_ZLIB

@@ -2,7 +2,7 @@
   Copyright (c) 1990-2005 Info-ZIP.  All rights reserved.
 
   See the accompanying file LICENSE, version 2004-May-22 or later
-  (the contents of which are also included in zip.h) for terms of use.
+  (the contents of which are also included in neozip.h) for terms of use.
   If, for some reason, both of these files are missing, the Info-ZIP license
   also may be found at:  ftp://ftp.info-zip.org/pub/infozip/license.html
 */
@@ -62,7 +62,7 @@
  * Warning: it uses the AT&T syntax: mov source,dest
  * This file is only optional. If you want to force the C version,
  * add -DNO_ASM to CFLAGS in Makefile and set OBJA to an empty string.
- * If you have reduced WSIZE in (g)zip.h, then make sure this is
+ * If you have reduced WSIZE in (g)neozip.h, then make sure this is
  * assembled with an equivalent -DWSIZE=<whatever>.
  * This version assumes static allocation of the arrays (-DDYN_ALLOC not used).
  */

@@ -69,7 +69,7 @@
 
 #define __DEFLATE_C
 
-#include "zip.h"
+#include "neozip.h"
 
 #ifndef USE_ZLIB
 

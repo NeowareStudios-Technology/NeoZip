@@ -13,12 +13,12 @@
  */
 #define __ZIPUP_C
 
-/* Found that for at least unix port zip.h has to be first or ctype.h will
+/* Found that for at least unix port neozip.h has to be first or ctype.h will
    define off_t and when using 64-bit file environment off_t in other files
    is 8 bytes while off_t here is 4 bytes, and this makes the zlist struct
    different sizes and needless to say leads to segmentation faults.  Putting
    zip.h first seems to fix this.  8/14/04 EG */
-#include "zip.h"
+#include "neozip.h"
 #include <ctype.h>
 #include <errno.h>
 

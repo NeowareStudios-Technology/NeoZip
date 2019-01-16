@@ -1,19 +1,19 @@
 /*
-  zip.c - Zip 3
+  neozip.c - Zip 3
 
   Copyright (c) 1990-2008 Info-ZIP.  All rights reserved.
 
   See the accompanying file LICENSE, version 2007-Mar-4 or later
-  (the contents of which are also included in zip.h) for terms of use.
+  (the contents of which are also included in neozip.h) for terms of use.
   If, for some reason, all these files are missing, the Info-ZIP license
   also may be found at:  ftp://ftp.info-zip.org/pub/infozip/license.html
 */
 /*
  *  zip.c by Mark Adler.
  */
-#define __ZIP_C
+#define __NEOZIP_C
 
-#include "zip.h"
+#include "neozip.h"
 #include <time.h>       /* for tzset() declaration */
 #if defined(WIN32) || defined(WINDLL)
 #  define WIN32_LEAN_AND_MEAN
@@ -1884,7 +1884,7 @@ int set_filetype(out_path)
    The fields:
        shortopt     - short option name (1 or 2 chars)
        longopt      - long option name
-       value_type   - see zip.h for constants
+       value_type   - see neozip.h for constants
        negatable    - option is negatable with trailing -
        ID           - unsigned long int returned for option
        name         - short description of option which is
