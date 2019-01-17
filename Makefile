@@ -129,19 +129,19 @@ unix.o: unix/unix.c
 unix_.o: unix/unix.c
 	$(CC) -c $(CFLAGS) -DUTIL -o $@ unix/unix.c
 
-ZIPS = zip$E zipcloak$E zipnote$E zipsplit$E
+ZIPS = neozip$E neozipcloak$E neozipnote$E neozipsplit$E
 
 zips: $(ZIPS)
 zipsman: $(ZIPS) $(ZIPMANUALs)
 
-zip$E: $(OBJZ) $(OBJI) $(OBJA) $(LIB_BZ)
+neozip$E: $(OBJZ) $(OBJI) $(OBJA) $(LIB_BZ)
 	$(BIND) -o neozip$E $(LFLAGS1) $(OBJZ) $(OBJI) $(OBJA) $(LFLAGS2)
 
-zipnote$E: $(OBJN)
+neozipnote$E: $(OBJN)
 	$(BIND) -o neozipnote$E $(LFLAGS1) $(OBJN) $(LFLAGS2)
-zipcloak$E: $(OBJC) $(OCRCTB)
+neozipcloak$E: $(OBJC) $(OCRCTB)
 	$(BIND) -o neozipcloak$E $(LFLAGS1) $(OBJC) $(LFLAGS2)
-zipsplit$E: $(OBJS)
+neozipsplit$E: $(OBJS)
 	$(BIND) -o neozipsplit$E $(LFLAGS1) $(OBJS) $(LFLAGS2)
 
 $(ZIPMANUAL): man/zip.1
