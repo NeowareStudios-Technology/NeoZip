@@ -29,6 +29,10 @@
 *.dylib
 
 # Executables
+neozip
+neozipcloak
+neozipnote
+neozipsplit
 *.exe
 *.out
 *.app
