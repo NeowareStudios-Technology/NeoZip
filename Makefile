@@ -84,16 +84,25 @@ OBJN = neozipnote.o  $(OBJU)
 OBJC = neozipcloak.o $(OBJU) $(OCRCTB) crypt_.o ttyio.o
 OBJS = neozipsplit.o $(OBJU)
 
+#paths to object files
+OBJZ_P = object/neozip.o object/neozipfile.o object/zipup.o object/fileio.o object/util.o object/globals.o object/crypt.o object/ttyio.o \
+       object/unix.o object/crc32.o object/zbz2err.o
+OBJI_P = object/deflate.o object/trees.o
+OBJU_P = object/neozipfile_.o object/fileio_.o object/util_.o object/globals.o object/unix_.o
+OBJN_P = object/neozipnote.o  $(OBJU_P)
+OBJC_P = object/neozipcloak.o $(OBJU_P) object/crypt_.o object/ttyio.o
+OBJS_P = object/neozipsplit.o $(OBJU_P)
+
 ZIP_H = neozip.h ziperr.h tailor.h unix/osdep.h
 
 # suffix rules
 .SUFFIXES:
 .SUFFIXES: _.o .o .c .doc .1
 .c_.o:
-	$(CC) -c $(CFLAGS) -DUTIL -o $@ $<
+	$(CC) -c $(CFLAGS) -DUTIL -o object/$@ $<
 
 .c.o:
-	$(CC) -c $(CFLAGS) $<
+	$(CC) -c $(CFLAGS) -o object/$@ $<
 
 .1.doc:
 	nroff -man $< | col -bx | uniq > $@
@@ -124,10 +133,10 @@ crc_i386.o: crc_i386.S
 	rm -f _crc_i386.s
 
 unix.o: unix/unix.c
-	$(CC) -c $(CFLAGS) unix/unix.c
+	$(CC) -c $(CFLAGS) unix/unix.c -o object/$@
 
 unix_.o: unix/unix.c
-	$(CC) -c $(CFLAGS) -DUTIL -o $@ unix/unix.c
+	$(CC) -c $(CFLAGS) -DUTIL -o object/$@ unix/unix.c
 
 ZIPS = neozip$E neozipcloak$E neozipnote$E neozipsplit$E
 
@@ -135,14 +144,14 @@ zips: $(ZIPS)
 zipsman: $(ZIPS) $(ZIPMANUALs)
 
 neozip$E: $(OBJZ) $(OBJI) $(OBJA) $(LIB_BZ)
-	$(BIND) -o neozip$E $(LFLAGS1) $(OBJZ) $(OBJI) $(OBJA) $(LFLAGS2)
+	$(BIND) -o neozip$E $(LFLAGS1) $(OBJZ_P) $(OBJI_P) $(OBJA_P) $(LFLAGS2)
 
 neozipnote$E: $(OBJN)
-	$(BIND) -o neozipnote$E $(LFLAGS1) $(OBJN) $(LFLAGS2)
+	$(BIND) -o neozipnote$E $(LFLAGS1) $(OBJN_P) $(LFLAGS2)
 neozipcloak$E: $(OBJC) $(OCRCTB)
-	$(BIND) -o neozipcloak$E $(LFLAGS1) $(OBJC) $(LFLAGS2)
+	$(BIND) -o neozipcloak$E $(LFLAGS1) $(OBJC_P) $(LFLAGS2)
 neozipsplit$E: $(OBJS)
-	$(BIND) -o neozipsplit$E $(LFLAGS1) $(OBJS) $(LFLAGS2)
+	$(BIND) -o neozipsplit$E $(LFLAGS1) $(OBJS_P) $(LFLAGS2)
 
 $(ZIPMANUAL): man/zip.1
 	nroff -man man/zip.1 | col -bx | uniq > $(ZIPMANUAL)
@@ -212,6 +221,7 @@ flags:  unix/configure
 #               Generic targets:
 #added to generic command: creat object dir, move object files to object dir 1/15/19 Lee
 generic: flags
+	$(OBJECT_D)
 	eval $(MAKE) $(MAKEF) zips `cat flags`
 	$(OBJECT_D)
 	$(MOVE_OBJECT_FILES)
