@@ -3,8 +3,6 @@
 
 #MAKE = make -f unix/Makefile
 MAKEF = -f Makefile
-SHELL = /bin/sh
-LN = ln -s
 
 # (to use the GNU compiler, change cc to gcc in CC)
 CC = cc
@@ -24,14 +22,6 @@ MOVE_OBJECT_FILES = mv flags* neozip.o neozipfile.o zipup.o fileio.o util.o crc3
 					deflate.o globals.o ttyio.o unix.o zbz2err.o trees.o neozipcloak.o fileio_.o\
 					neozipfile_.o crc32_.o crypt_.o unix_.o util_.o neozipnote.o neozipsplit.o object/
 
-INSTALL_D = mkdir -p
-CHMOD = chmod
-BINFLAGS = 755
-MANFLAGS = 644
-
-# target directories - where to install executables and man pages to
-
-VERSION = Version 3.0
 
 # flags
 #   CFLAGS    flags for C compile
@@ -65,7 +55,7 @@ ZIP_H = neozip.h ziperr.h tailor.h unix/osdep.h
 .c.o:
 	$(CC) -c $(CFLAGS) $<
 
-# rules for neozip, neozipnote, neozipcloak, neozipsplit, and the Zip MANUALs.
+# rules for neozip, neozipnote, neozipcloak, neozipsplit
 $(OBJZ): $(ZIP_H)
 $(OBJI): $(ZIP_H)
 $(OBJN): $(ZIP_H)
