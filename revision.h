@@ -50,7 +50,7 @@ extern ZCONST char * far cryptnote[7];
 #else /* DEFCPYRT */
 
 ZCONST char *copyright[] = {
-"Copyright (c) 2019 NeoZip - Type '%s \"-L\"' for software license."
+"Copyright (c) 2019 NeoWare - Type '%s \"-L\"' for software license."
 /* XXX still necessary ???? */
 #ifdef AZTEC_C
 ,        /* extremely lame compiler bug workaround */
