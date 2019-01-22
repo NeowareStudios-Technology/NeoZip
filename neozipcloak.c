@@ -205,7 +205,7 @@ local void license()
 
 static ZCONST char *help_info[] = {
 "",
-"ZipCloak %s (%s)",
+"NeoZipCloak %s (%s)",
 #ifdef VM_CMS
 "Usage:  zipcloak [-dq] [-b fm] zipfile",
 #else
