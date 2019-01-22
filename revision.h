@@ -21,15 +21,15 @@
 #define Z_PATCHLEVEL 0
 #define Z_BETALEVEL "i BETA"
 
-#define VERSION "3.0"
-#define REVDATE "July 5th 2008"
+#define VERSION "0.1"
+#define REVDATE "January 2019"
 
 #define DW_MAJORVER    Z_MAJORVER
 #define DW_MINORVER    Z_MINORVER
 #define DW_PATCHLEVEL  Z_PATCHLEVEL
 
 #ifndef IZ_COMPANY_NAME               /* might be already defined... */
-#  define IZ_COMPANY_NAME "Info-ZIP"
+#  define IZ_COMPANY_NAME "NeoZip"
 #endif
 
 #if !defined(WINDLL) && !defined(IZ_VERSION_SYMBOLS_ONLY)
@@ -50,7 +50,7 @@ extern ZCONST char * far cryptnote[7];
 #else /* DEFCPYRT */
 
 ZCONST char *copyright[] = {
-"Copyright (c) 1990-2008 Info-ZIP - Type '%s \"-L\"' for software license."
+"Copyright (c) 2019 NeoZip - Type '%s \"-L\"' for software license."
 /* XXX still necessary ???? */
 #ifdef AZTEC_C
 ,        /* extremely lame compiler bug workaround */
@@ -58,13 +58,7 @@ ZCONST char *copyright[] = {
 };
 
 ZCONST char * far versinfolines[] = {
-"This is %s %s (%s), by Info-ZIP.",
-"Currently maintained by E. Gordon.  Please send bug reports to",
-"the authors using the web page at www.info-zip.org; see README for details.",
-"",
-"Latest sources and executables are at ftp://ftp.info-zip.org/pub/infozip,",
-"as of above date; see http://www.info-zip.org/ for other sites.",
-""
+"This is %s %s (%s), by NeoZip."
 };
 
 /* new notice - 4 March 2007 */
@@ -79,19 +73,8 @@ ZCONST char * far cryptnote[] = {
 };
 
 ZCONST char * far swlicense[] = {
-"Copyright (c) 1990-2008 Info-ZIP.  All rights reserved.",
+"Copyright (c) 2019 NeoZip.  All rights reserved.",
 "",
-"For the purposes of this copyright and license, \"Info-ZIP\" is defined as",
-"the following set of individuals:",
-"",
-"   Mark Adler, John Bush, Karl Davis, Harald Denker, Jean-Michel Dubois,",
-"   Jean-loup Gailly, Hunter Goatley, Ed Gordon, Ian Gorman, Chris Herborth,",
-"   Dirk Haase, Greg Hartwig, Robert Heath, Jonathan Hudson, Paul Kienitz,",
-"   David Kirschbaum, Johnny Lee, Onno van der Linden, Igor Mandrichenko,",
-"   Steve P. Miller, Sergio Monesi, Keith Owens, George Petrov, Greg Roelofs,",
-"   Kai Uwe Rommel, Steve Salisbury, Dave Smith, Steven M. Schweda,",
-"   Christian Spieler, Cosmin Truta, Antoine Verheijen, Paul von Behren,",
-"   Rich Wales, Mike White",
 "",
 "This software is provided \"as is,\" without warranty of any kind, express",
 "or implied.  In no event shall Info-ZIP or its contributors be held liable",
@@ -130,9 +113,6 @@ ZCONST char * far swlicense[] = {
 "       e-mail addresses or the Info-ZIP URL(s), such as to imply Info-ZIP",
 "       will provide support for the altered versions.",
 "",
-"    4. Info-ZIP retains the right to use the names \"Info-ZIP,\" \"Zip,\" \"UnZip,\"",
-"       \"UnZipSFX,\" \"WiZ,\" \"Pocket UnZip,\" \"Pocket Zip,\" and \"MacZip\" for its",
-"       own source and binary releases."
 };
 #endif /* DEFCPYRT */
 #endif /* !WINDLL && !IZ_VERSION_SYMBOLS_ONLY */
