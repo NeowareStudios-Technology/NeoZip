@@ -209,7 +209,7 @@ local void help()
   /* help array */
   static ZCONST char *text[] = {
 "",
-"ZipNote %s (%s)",
+"NeoZipNote %s (%s)",
 #ifdef VM_CMS
 "Usage:  zipnote [-w] [-q] [-b fm] zipfile",
 #else

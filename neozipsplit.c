@@ -284,7 +284,7 @@ local void help()
   /* help array */
   static ZCONST char *text[] = {
 "",
-"ZipSplit %s (%s)",
+"NeoZipSplit %s (%s)",
 #ifdef VM_CMS
 "Usage:  zipsplit [-tipqs] [-n size] [-r room] [-b fm] zipfile",
 #else
